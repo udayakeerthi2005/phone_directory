@@ -17,6 +17,10 @@ class PhoneDirectory:
         return self.size == 0
 
     def create_contact(self, name, phone_number):
+        if not name or not phone_number:
+            st.warning("Please enter both name and phone number")
+            return
+            
         new_node = Node(name, phone_number)
         if self.is_empty():
             self.head = new_node
@@ -28,6 +32,10 @@ class PhoneDirectory:
         self.size += 1
 
     def delete_contact(self, name):
+        if not name:
+            st.warning("Please enter a name to delete")
+            return
+            
         current = self.head
         while current:
             if current.name == name:
@@ -48,6 +56,10 @@ class PhoneDirectory:
         st.warning(f"Contact '{name}' not found.")
 
     def search_contact(self, name):
+        if not name:
+            st.warning("Please enter a name to search")
+            return
+            
         current = self.head
         while current:
             if current.name == name:
@@ -59,30 +71,46 @@ class PhoneDirectory:
     def display_contacts(self):
         if self.is_empty():
             st.warning("Phone directory is empty.")
-        else:
-            current = self.head
-            st.table(data=[[c.name, c.phone_number] for c in [current] + [n for n in current.next]])
+            return
+            
+        contacts = []
+        current = self.head
+        while current:
+            contacts.append([current.name, current.phone_number])
+            current = current.next
+            
+        st.write("### Contact List")
+        st.table({"Name": [c[0] for c in contacts], 
+                 "Phone Number": [c[1] for c in contacts]})
 
 def main():
     st.title("Phone Directory App")
-
-    phone_directory = PhoneDirectory()
+    
+    if 'phone_directory' not in st.session_state:
+        st.session_state.phone_directory = PhoneDirectory()
 
     name = st.text_input("Enter name:")
     phone_number = st.text_input("Enter phone number:")
 
-    if st.button("Add Contact"):
-        phone_directory.create_contact(name, phone_number)
-        st.success("Contact added successfully!")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("Add Contact"):
+            st.session_state.phone_directory.create_contact(name, phone_number)
+            if name and phone_number:
+                st.success("Contact added successfully!")
 
-    if st.button("Delete Contact"):
-        phone_directory.delete_contact(name)
+    with col2:
+        if st.button("Delete Contact"):
+            st.session_state.phone_directory.delete_contact(name)
 
-    if st.button("Search Contact"):
-        phone_directory.search_contact(name)
+    with col3:
+        if st.button("Search Contact"):
+            st.session_state.phone_directory.search_contact(name)
 
-    if st.button("Display Contacts"):
-        phone_directory.display_contacts()
+    with col4:
+        if st.button("Display Contacts"):
+            st.session_state.phone_directory.display_contacts()
 
 if __name__ == "__main__":
     main()
